@@ -10,7 +10,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class Element {
+public class Topic4_5_Xpath_CSS {
     WebDriver driver;
     By fullName = By.xpath("//input[@id='txtFirstname']");
     By email = By.xpath("//input[@id='txtEmail']");
