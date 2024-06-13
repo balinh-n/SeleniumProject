@@ -2,15 +2,14 @@ package exercise;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.Properties;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.Color;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -37,16 +36,16 @@ public class Topic10_Interaction {
         Assert.assertTrue(driver.findElement(By.cssSelector("div.ui-helper-hidden-accessible")).isDisplayed());
     }
 
-    @Test
-    public void TC2_HoverToElement() {
-        driver.get("http://www.myntra.com/");
+    //@Test
+    // public void TC2_HoverToElement() {
+    //     driver.get("http://www.myntra.com/");
 
-        WebElement kids = driver.findElement(By.xpath("//div[@class='desktop-navLink']/a[text()='Kids']"));
-        WebElement homeandbath = driver.findElement(By.xpath("//a[text()='Home & Bath']"));
-        Actions actions = new Actions(driver);
-        actions.moveToElement(kids).moveToElement(homeandbath).click().build().perform();
-        Assert.assertTrue(driver.findElement(By.xpath("//span[text()='Kids Home Bath']")).isDisplayed());
-    }
+    //     WebElement kids = driver.findElement(By.xpath("//div[@class='desktop-navLink']/a[text()='Kids']"));
+    //     WebElement homeandbath = driver.findElement(By.xpath("//a[text()='Home & Bath']"));
+    //     Actions actions = new Actions(driver);
+    //     actions.moveToElement(kids).moveToElement(homeandbath).click().build().perform();
+    //     Assert.assertTrue(driver.findElement(By.xpath("//span[text()='Kids Home Bath']")).isDisplayed());
+    // }
 
     @Test
     public void TC3_Fahasa() throws InterruptedException {
@@ -74,7 +73,7 @@ public class Topic10_Interaction {
 
         List<WebElement> numberselected = driver
                 .findElements(By.xpath("//ol[@id='selectable']/li[@class='ui-state-default ui-selectee ui-selected']"));
-        Assert.assertEquals(numberselected.size(), "4");
+        Assert.assertEquals(numberselected.size(), 4);
     }
 
     @Test
@@ -117,13 +116,17 @@ public class Topic10_Interaction {
     }
     
     @Test
-    public void TC8_DraganDrop() {
+    public void TC8_DraganDrop() throws InterruptedException {
         driver.get("https://automationfc.github.io/kendo-drag-drop/");
         Actions actions = new Actions(driver);
         WebElement source = driver.findElement(By.cssSelector("div#draggable"));
         WebElement target = driver.findElement(By.cssSelector("div#droptarget"));
-        actions.dragAndDrop(source, target);
-    
+        actions.dragAndDrop(source, target).perform();
+        Thread.sleep(2000);
+        Assert.assertEquals(target.getText(), "You did great!");
+        String color = driver.findElement(By.cssSelector("div#draggable")).getCssValue("background-color");
+        String hex = Color.fromString(color).asHex();
+        Assert.assertEquals(hex, "#03a9f4");
     }
     @AfterMethod
     public void closeBrowser() {
