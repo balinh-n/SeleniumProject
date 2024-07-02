@@ -2,7 +2,7 @@ package exercise;
 
 import java.time.Duration;
 import java.util.List;
-
+import java.util.Set;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.SearchContext;
@@ -147,6 +147,7 @@ public class Topic11_PopUp_Iframe_Window {
     }
 
     @Test
+    // Mặc định mở trang đăng nhập khi chạy auto
     public void TC9_ShadowRootInDom() throws InterruptedException {
         driver.manage().deleteAllCookies();
         driver.get("https://shopee.vn/");
@@ -163,11 +164,10 @@ public class Topic11_PopUp_Iframe_Window {
         }
     }
 
-
     @Test
     public void TC10_IFrame() {
         driver.get("https://toidicodedao.com/");
-       
+
         WebElement fbView = driver.findElement(By.cssSelector("div.fb-page.fb_iframe_widget"));
         JavascriptExecutor js = (JavascriptExecutor) driver;
         js.executeScript("arguments[0].scrollIntoView();", fbView);
@@ -183,7 +183,7 @@ public class Topic11_PopUp_Iframe_Window {
         driver.get("https://www.formsite.com/templates/education/campus-safety-survey/");
         WebElement formview = driver.findElement(By.cssSelector("div#imageTemplateContainer"));
         JavascriptExecutor js = (JavascriptExecutor) driver;
-        js.executeScript("arguments[0].scrollIntoView();",formview);
+        js.executeScript("arguments[0].scrollIntoView();", formview);
         formview.click();
         Thread.sleep(5000);
 
@@ -197,8 +197,8 @@ public class Topic11_PopUp_Iframe_Window {
                 break;
             }
         }
-       
-        List<WebElement> residenceList  = driver.findElements(By.cssSelector("select#RESULT_RadioButton-3 option"));
+
+        List<WebElement> residenceList = driver.findElements(By.cssSelector("select#RESULT_RadioButton-3 option"));
         for (WebElement residence : residenceList) {
             if (residence.getText().equals("North Dorm")) {
                 residence.click();
@@ -217,8 +217,148 @@ public class Topic11_PopUp_Iframe_Window {
         Assert.assertTrue(errorMessage.isDisplayed());
         Assert.assertEquals(errorMessage.getText(), "Username and password are both required.");
     }
+
+    @Test
+    public void TC12_Frame() throws InterruptedException {
+        driver.get("https://netbanking.hdfcbank.com/netbanking/");
+        driver.switchTo().frame("login_page");
+        driver.findElement(By.xpath("//input[@name ='fldLoginUserId']")).sendKeys("12345");
+        driver.findElement(By.xpath("//a[@onclick='return fLogon();']")).click();
+        Thread.sleep(3000);
+        Assert.assertTrue(driver.findElement(By.xpath("//input[@name='fldPassword']")).isDisplayed());
+    }
+
+    @Test
+    public void TC13_Window_Tab() throws InterruptedException {
+        driver.get("https://automationfc.github.io/basic-form/index.html");
+        String defaultwindow = "Selenium WebDriver";
+
+        driver.findElement(By.xpath("//a[text()='GOOGLE']")).click();
+        Thread.sleep(3000);
+        switchWindow("Google");
+
+        switchWindow(defaultwindow);
+
+        driver.findElement(By.xpath("//a[text()='FACEBOOK']")).click();
+        Thread.sleep(3000);
+        switchWindow("Facebook - Đăng nhập hoặc đăng ký");
+
+        switchWindow(defaultwindow);
+
+        driver.findElement(By.xpath("//a[text()='TIKI']")).click();
+        Thread.sleep(3000);
+        switchWindow("Tiki - Mua hàng online giá tốt, hàng chuẩn, ship nhanh");
+    }
+
+    public void switchWindow(String title) {
+        Set<String> allwindow = driver.getWindowHandles();
+        for (String window : allwindow) {
+
+            driver.switchTo().window(window);
+            String actualTitle = driver.getTitle();
+            if (actualTitle.equals(title)) {
+                break;
+            }
+        }
+    }
+
+    @Test
+    public void TC14_WindowTab() throws InterruptedException {
+        driver.get("http://live.techpanda.org/");
+
+        driver.findElement(By.xpath("//a[text()='Mobile']")).click();
+        Thread.sleep(2000);
+        driver.findElement(By.xpath("//a[@title='Xperia']//following-sibling::div//a[text()='Add to Compare']")).click();
+        Thread.sleep(2000);
+        String xperiasuccess = driver.findElement(By.cssSelector("li.success-msg span")).getText();
+        Assert.assertEquals(xperiasuccess, "The product Sony Xperia has been added to comparison list.");
+
+        //a[@title='Samsung Galaxy']//following-sibling::div//a[text()='Add to Compare']
+        driver.findElement(By.xpath("//a[@title='Samsung Galaxy']//following-sibling::div//a[text()='Add to Compare']")).click();
+        Thread.sleep(2000);
+        String galaxysuccess = driver.findElement(By.cssSelector("li.success-msg span")).getText();
+        Assert.assertEquals(galaxysuccess, "The product Samsung Galaxy has been added to comparison list.");
+        Thread.sleep(2000);
+
+        driver.findElement(By.xpath("//button[@title='Compare']")).click();
+
+        switchWindow("Products Comparison List - Magento Commerce");
+        Assert.assertEquals(driver.getTitle(), "Products Comparison List - Magento Commerce");
+        driver.close();
+
+        switchWindow("Mobile");
+
+        driver.findElement(By.xpath("//a[text()='Clear All']")).click();
+        driver.switchTo().alert().accept();
+
+        String clearAll = driver.findElement(By.cssSelector("li.success-msg span")).getText();
+        Assert.assertEquals(clearAll, "The comparison list was cleared.");
+    
+    }
+
+    @Test
+    public void TC15_WindowTab() throws InterruptedException{
+        driver.get("https://dictionary.cambridge.org/vi/");
+        
+        driver.findElement(By.xpath("//span/span[text()='Đăng nhập']")).click();
+
+        switchWindow("Login");
+        Thread.sleep(2000);
+        driver.findElement(By.xpath("//form[@id='gigya-login-form']//input[@type='submit']")).click();
+        String usernameError = driver.findElement(By.xpath("//input[@name='username']//following-sibling::span[contains(@class,'gigya-error-code-400027')]")).getText();
+        String passwordError =driver.findElement(By.xpath("//input[@name='password']//following-sibling::span[contains(@class,'gigya-error-code-400027')]")).getText();
+        Assert.assertEquals(usernameError, "This field is required");
+        Assert.assertEquals(passwordError, "This field is required");
+
+        driver.close();
+        switchWindow("Cambridge Dictionary | Từ điển tiếng Anh, Bản dịch & Từ điển từ đồng nghĩa");
+        driver.findElement(By.cssSelector("input#searchword")).sendKeys("automation");
+        driver.findElement(By.xpath("//button[@title='Tìm kiếm']")).click();
+        Thread.sleep(2000);
+
+        Assert.assertTrue(driver.findElement(By.xpath("//div[@id='dataset_cald4']//following-sibling::div[@class='link']//span[@class='hw dhw']")).isDisplayed());   
+    }
+
+    @Test
+    public void TC16_WindowTab() throws InterruptedException {
+        driver.get("https://courses.dce.harvard.edu/");
+        driver.findElement(By.cssSelector("a.anon-only")).click();
+
+        Thread.sleep(5000);
+        switchWindow("Harvard Division of Continuing Education Login Portal");
+        driver.findElement(By.cssSelector("div.cd7be4319.c2de32735")).isDisplayed();
+        driver.close();
+
+        Thread.sleep(3000);
+        switchWindow("DCE Course Search");
+        Assert.assertTrue(driver.findElement(By.cssSelector("div#sam-wait")).isDisplayed());
+        driver.findElement(By.cssSelector("button.fa.fa-times.sam-wait__close")).click();
+
+        driver.findElement(By.cssSelector("select#crit-summer_school")).click();
+        List<WebElement> options = driver.findElements(By.cssSelector("select#crit-summer_school option"));
+        for (WebElement option : options) {
+            if(option.getText().equals("Adult, Extension, & Visiting College")) {
+                option.click();
+                break;
+            }
+        }
+
+        driver.findElement(By.cssSelector("select#crit-session")).click();
+        List<WebElement> courses = driver.findElements(By.cssSelector("select#crit-session option"));
+        for (WebElement course : courses) {
+            if(course.getText().equals("3-week session II")) {
+                course.click();
+                break;
+            }
+        }
+
+        driver.findElement(By.cssSelector("button#search-button")).click();
+        List<WebElement> courseLists = driver.findElements(By.cssSelector("div.panel.panel--kind-results.panel--visible div.result.result--group-start"));
+
+        Assert.assertEquals(courseLists.size(), 21);
+    }
     @AfterMethod
     public void closeBrowser() {
-    driver.close();
+        driver.quit();
     }
 }
