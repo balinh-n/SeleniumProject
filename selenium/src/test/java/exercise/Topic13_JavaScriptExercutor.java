@@ -1,8 +1,6 @@
 package exercise;
 
 import java.time.Duration;
-import java.util.Random;
-
 import org.apache.commons.lang3.RandomStringUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -14,9 +12,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import net.bytebuddy.utility.RandomString;
-
-public class Topic12_JavaScriptExercutor {
+public class Topic13_JavaScriptExercutor {
     WebDriver driver;
     JavascriptExecutor js;
     
