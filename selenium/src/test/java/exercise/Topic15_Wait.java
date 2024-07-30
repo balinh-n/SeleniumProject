@@ -5,10 +5,12 @@ import java.util.List;
 import java.util.function.Function;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -22,6 +24,7 @@ public class Topic15_Wait {
     WebDriverWait webDriverWait;
     FluentWait<WebDriver> fluentDriver;
     FluentWait<WebElement> fluentElement;
+
     @BeforeMethod
     public void OpenBrowser() {
         driver = new ChromeDriver();
@@ -129,17 +132,17 @@ public class Topic15_Wait {
         fluentElement = new FluentWait<WebElement>(countDown);
 
         fluentElement.withTimeout(Duration.ofSeconds(15))
-        .pollingEvery(Duration.ofSeconds(1))
-        .ignoring(NoSuchElementException.class);
+                .pollingEvery(Duration.ofSeconds(1))
+                .ignoring(NoSuchElementException.class);
 
-        fluentElement.until(new Function<WebElement,Boolean>() {
+        fluentElement.until(new Function<WebElement, Boolean>() {
 
             @Override
             public Boolean apply(WebElement t) {
                 String text = t.getText();
-                return text.endsWith("00"); 
+                return text.endsWith("00");
             }
-            
+
         });
     }
 
@@ -151,19 +154,50 @@ public class Topic15_Wait {
         fluentDriver = new FluentWait<WebDriver>(driver);
 
         fluentDriver.withTimeout(Duration.ofSeconds(30))
-        .pollingEvery(Duration.ofMillis(100))
-        .ignoring(NoSuchElementException.class);
+                .pollingEvery(Duration.ofMillis(100))
+                .ignoring(NoSuchElementException.class);
 
-        fluentDriver.until(new Function<WebDriver,Boolean>() {
+        fluentDriver.until(new Function<WebDriver, Boolean>() {
 
             @Override
             public Boolean apply(WebDriver webDriver) {
                 return webDriver.findElement(By.xpath("//h4")).isDisplayed();
             }
-            
+
         });
     }
 
+    @Test
+    public void TC1_PageReady() {
+
+        driver.get("https://admin-demo.nopcommerce.com");
+
+        driver.findElement(By.xpath("//button[@type='submit']")).click();
+        Assert.assertTrue(pageLoad());
+        driver.findElement(By.xpath("//a[text()='Logout']")).click();
+        Assert.assertTrue(pageLoad());
+    }
+
+    public Boolean pageLoad() {
+        WebDriverWait explicitWait = new WebDriverWait(driver, Duration.ofSeconds(30));
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        ExpectedCondition<Boolean> jQueryload = new ExpectedCondition<Boolean>() {
+
+            @Override
+            public Boolean apply(WebDriver driver) {
+                return (Boolean) js.executeScript("return (window.jQuery != null) && (jQuery.active ===0);");
+            }
+        };
+        ExpectedCondition<Boolean> jsLoad = new ExpectedCondition<Boolean>() {
+
+            @Override
+            public Boolean apply(WebDriver input) {
+                return js.executeScript("return document.readyState").toString().equals("complete");
+            }
+
+        };
+        return explicitWait.until(jQueryload) && explicitWait.until(jsLoad);
+    }
 
     public void sleep(int num) {
         try {
